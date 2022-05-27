@@ -29,13 +29,15 @@ const PORT = env["PORT"] || 8080;
 
 app.use(cors())
 
-app.use(cookieParser() as RequestHandler);
+// app.use(cookieParser() as RequestHandler)
 
 app.use(express.json());
 
 app.use(session({
     store: Store,
-    secret: env["SESSION_SECRET"] || 'secret'
+    secret: env["SESSION_SECRET"] || 'secret',
+    resave: true,
+    saveUninitialized: true,
 }) as RequestHandler);
 
 

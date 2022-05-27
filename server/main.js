@@ -30,7 +30,6 @@ const express_session_1 = __importDefault(require("express-session"));
 const cors_1 = __importDefault(require("cors"));
 const session_1 = __importDefault(require("./models/session"));
 const express_1 = __importStar(require("express"));
-const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const dbfile = (0, path_1.join)((0, path_1.resolve)('.'), process_1.env["dbFileName"] || 'sqlite.db');
 console.log("DB File:", dbfile);
 const sqlite = process_1.env.NODE_ENV == "development" ? (0, sqlite3_1.verbose)() : sqlite3_1.default;
@@ -41,11 +40,13 @@ const app = (0, express_1.default)();
 const router = (0, express_1.Router)();
 const PORT = process_1.env["PORT"] || 8080;
 app.use((0, cors_1.default)());
-app.use((0, cookie_parser_1.default)());
+// app.use(cookieParser() as RequestHandler)
 app.use(express_1.default.json());
 app.use((0, express_session_1.default)({
     store: Store,
-    secret: process_1.env["SESSION_SECRET"] || 'secret'
+    secret: process_1.env["SESSION_SECRET"] || 'secret',
+    resave: true,
+    saveUninitialized: true,
 }));
 router.get('/', (req, res, next) => {
     res.send("Hello, world!");
