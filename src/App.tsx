@@ -1,58 +1,39 @@
-import React from 'react';
+import React, { ChangeEvent, ChangeEventHandler } from 'react';
 import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
 import './App.css';
+import { useSelector, useDispatch } from "react-redux";
+import { AppDispatch, RootState } from './app/store';
+import { authenticateUser } from './features/account/accountSlice'
+import { AsyncThunkAction } from '@reduxjs/toolkit';
 
-function App() {
+interface AppProps {
+
+};
+interface AppState {
+  username: string;
+  password: string;
+};
+
+function App (props: AppProps) {
+  const [ state, setState ] = React.useState<AppState>({
+    username: "",
+    password: ""
+  });
+
+  const name = useSelector((state: RootState) => state.name.name);
+  const account = useSelector((state: RootState) => state.account);
+  const dispatch: AppDispatch = useDispatch();
+  const auth = (username: string, password: string) => dispatch(authenticateUser({username, password}));
+  const handleChange = (which: number, event: ChangeEvent<HTMLInputElement>) => {
+    setState(Object.assign({}, state, which ? {password: event.target.value} : {username: event.target.value}));
+  }
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <span>
-          <span>Learn </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux Toolkit
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-        </span>
-      </header>
-    </div>
-  );
+  <div style={{display: 'flex', 'flexDirection': 'column', width: '400px'}}>
+    <input type="text" value={state.username} onChange={e => handleChange(0, e)}/>
+    <input type="text" value={state.password} onChange={e => handleChange(1, e)}/>
+    <input type="button" onClick={e => auth(state.username, state.password)} value="Login"/>
+    { account.loggedIn ? <p>Username: {account.username}</p>: <></> }
+  </div>);
 }
 
 export default App;
