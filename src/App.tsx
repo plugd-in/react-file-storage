@@ -1,4 +1,4 @@
-import React, { ChangeEvent, ChangeEventHandler } from 'react';
+import React, { ChangeEvent, ChangeEventHandler, useEffect } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import { useSelector, useDispatch } from "react-redux";
@@ -25,6 +25,10 @@ function App (props: AppProps) {
   });
 
   const user = useUser();
+
+  useEffect(() => {
+    user.validateSession();
+  }, [user.loggedIn]);
 
   const handleChange = (which: number, event: ChangeEvent<HTMLInputElement>) => {
     setState(Object.assign({}, state, which ? {password: event.target.value} : {username: event.target.value}));

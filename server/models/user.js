@@ -2,8 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const crypto_1 = require("crypto");
 class UserModel {
-    constructor(db) {
+    constructor(db, sessionStore) {
         this.db = db;
+        this.sessionStore = sessionStore;
     }
     getUser(username) {
         return new Promise((resolve, reject) => {
@@ -71,6 +72,9 @@ class UserModel {
                 });
             });
         });
+    }
+    getUserBySession(sessionId) {
+        return this.sessionStore.getSessionUser(sessionId);
     }
 }
 exports.default = UserModel;

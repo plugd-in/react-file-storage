@@ -76,7 +76,7 @@ class SessionStore extends Store {
             const now = new Date().getTime();
             let expired = maxAge ? now + maxAge : now + this.lifetime;
             let rawSession = JSON.stringify(session);
-            this.db.get(`INSERT OR REPLACE INTO ${this.table} VALUES (?, ?, ?, ?)`, [sessionId, expired, rawSession, null], (err, rows) => {
+            this.db.get(`WITH a(x) AS (SELECT uid FROM sessions WHERE sid=?) INSERT OR REPLACE INTO ${this.table} VALUES (?, ?, ?, (SELECT a.x FROM a))`, [sessionId, sessionId, expired, rawSession], (err, rows) => {
                 if (err)
                     callback(err);
                 else if (callback)
@@ -108,8 +108,28 @@ class SessionStore extends Store {
             });
         }
         else {
-            callback(null, true);
+            callback(null, false);
         }
+    }
+    getSessionUser(sessionId) {
+        return new Promise((resolve, reject) => {
+            this.db.get(`SELECT u.* FROM ${this.table} s INNER JOIN users u USING(uid) WHERE s.sid = ?`, [sessionId], (err, row) => {
+                if (err)
+                    reject(err);
+                else if (row)
+                    resolve({ uid: row.uid, username: row.username, passwordHash: row.password_hash });
+                else
+                    resolve(null);
+            });
+        });
+    }
+    authenticateSession(sessionId, uid) {
+        const now = new Date().getTime();
+        console.log("Merk 3:", sessionId, uid);
+        this.db.run(`UPDATE ${this.table} SET uid = ? WHERE sid = ? AND ? <= expired`, [uid, sessionId, now], (err) => {
+            if (err)
+                console.error(err);
+        });
     }
 }
 exports.default = SessionStore;

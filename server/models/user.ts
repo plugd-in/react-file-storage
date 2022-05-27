@@ -1,18 +1,15 @@
 import { Database, RunResult } from "sqlite3";
-import { Account } from "../interfaces";
+import { Account, RawAccount } from "../interfaces";
 import { pbkdf2 as hashPassword, pbkdf2, randomBytes, randomUUID } from 'crypto';
 import assert from "assert";
-
-interface RawAccount {
-    uid: string;
-    username: string;
-    password_hash: string;
-}
+import SessionStore from "./session";
 
 export default class UserModel {
     private db: Database;
-    constructor (db: Database) {
+    private sessionStore: SessionStore;
+    constructor (db: Database, sessionStore: SessionStore) {
         this.db = db;
+        this.sessionStore = sessionStore;
     }
 
     getUser (username): Promise<Account> {
@@ -93,5 +90,9 @@ export default class UserModel {
                 })
             });
         });
+    }
+
+    getUserBySession (sessionId: string): Promise<Account | null> {
+        return this.sessionStore.getSessionUser(sessionId);
     }
 }

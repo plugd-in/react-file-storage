@@ -1,5 +1,12 @@
 import { Cookie as _Cookie } from "express-session";
 
+
+export interface RawAccount {
+    uid: string;
+    username: string;
+    password_hash: string;
+}
+
 export interface Account {
     uid: string; // Primary Key uuid4
     username: string; // Unique

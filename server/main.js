@@ -28,50 +28,30 @@ const process_1 = require("process");
 const user_1 = __importDefault(require("./models/user"));
 const express_session_1 = __importDefault(require("express-session"));
 const cors_1 = __importDefault(require("cors"));
+const account_1 = __importDefault(require("./routing/account"));
 const session_1 = __importDefault(require("./models/session"));
 const express_1 = __importStar(require("express"));
 const dbfile = (0, path_1.join)((0, path_1.resolve)('.'), process_1.env["dbFileName"] || 'sqlite.db');
 console.log("DB File:", dbfile);
 const sqlite = process_1.env.NODE_ENV == "development" ? (0, sqlite3_1.verbose)() : sqlite3_1.default;
 const db = new sqlite.Database(dbfile);
-const userModel = new user_1.default(db);
-const Store = new session_1.default((typeof express_session_1.default["session"] !== "undefined") ? express_session_1.default["session"].Store : express_session_1.default.Store, { db });
+const store = new session_1.default((typeof express_session_1.default["session"] !== "undefined") ? express_session_1.default["session"].Store : express_session_1.default.Store, { db });
+const userModel = new user_1.default(db, store);
 const app = (0, express_1.default)();
-const router = (0, express_1.Router)();
 const PORT = process_1.env["PORT"] || 8080;
 app.use((0, cors_1.default)());
-// app.use(cookieParser() as RequestHandler)
 app.use(express_1.default.json());
 app.use((0, express_session_1.default)({
-    store: Store,
+    store: store,
     secret: process_1.env["SESSION_SECRET"] || 'secret',
-    resave: true,
+    resave: false,
     saveUninitialized: true,
+    cookie: {
+        maxAge: 3600000
+    }
 }));
-router.get('/', (req, res, next) => {
-    res.send("Hello, world!");
-});
-router.post('/account/login', (req, res) => {
-    res.set({
-        "Accept-Post": "application/json",
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*"
-    });
-    const jsonBody = req.body;
-    if (typeof jsonBody == "object" &&
-        typeof jsonBody["username"] !== "undefined" &&
-        typeof jsonBody["password"] !== "undefined") {
-        userModel.authenticateUser(jsonBody.username, jsonBody.password).then(user => {
-            res.status(200).json(user);
-        }).catch(err => {
-            res.status(401).end();
-        });
-    }
-    else {
-        res.status(400).end();
-    }
-});
-app.use('/', router);
+app.use('/account', (0, account_1.default)(userModel, store));
+app.use('/', (0, express_1.static)('build'));
 app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}...`);
 });
