@@ -2,9 +2,13 @@ import React, { ChangeEvent, ChangeEventHandler } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import { useSelector, useDispatch } from "react-redux";
-import { AppDispatch, RootState } from './app/store';
-import { authenticateUser } from './features/account/accountSlice'
 import { AsyncThunkAction } from '@reduxjs/toolkit';
+
+import { useUser } from './store/account.store';
+
+export const config = {
+  apiRoot: "http://localhost:8080"
+};
 
 interface AppProps {
 
@@ -20,10 +24,8 @@ function App (props: AppProps) {
     password: ""
   });
 
-  const name = useSelector((state: RootState) => state.name.name);
-  const account = useSelector((state: RootState) => state.account);
-  const dispatch: AppDispatch = useDispatch();
-  const auth = (username: string, password: string) => dispatch(authenticateUser({username, password}));
+  const user = useUser();
+
   const handleChange = (which: number, event: ChangeEvent<HTMLInputElement>) => {
     setState(Object.assign({}, state, which ? {password: event.target.value} : {username: event.target.value}));
   }
@@ -31,8 +33,8 @@ function App (props: AppProps) {
   <div style={{display: 'flex', 'flexDirection': 'column', width: '400px'}}>
     <input type="text" value={state.username} onChange={e => handleChange(0, e)}/>
     <input type="text" value={state.password} onChange={e => handleChange(1, e)}/>
-    <input type="button" onClick={e => auth(state.username, state.password)} value="Login"/>
-    { account.loggedIn ? <p>Username: {account.username}</p>: <></> }
+    <input type="button" value="Login" onClick={() => user.authenticateUser(state.username, state.password)}/>
+    { user.loggedIn ? <p>{user.username}</p>:<></> }
   </div>);
 }
 
