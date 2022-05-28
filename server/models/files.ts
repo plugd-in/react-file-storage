@@ -1,11 +1,21 @@
 import { sqlite3, Database } from "sqlite3";
 import SessionStore from "./session";
 import { FileObject, FileList } from '../interfaces';
+import { randomUUID } from "crypto";
 
 interface FileModelConfig {
     db: Database;
     store: SessionStore;
     table?: string;
+}
+
+function getUserBySession (sessionStore: SessionStore, sessionId: string) {
+    return sessionStore.getSessionUser(sessionId).then(account => {
+        if ( account === null )
+            return Promise.reject(new Error("Session not authenticated."));
+        else 
+            return Promise.resolve(account);
+    });
 }
 
 export default class FileModel {
@@ -40,12 +50,7 @@ export default class FileModel {
     }
 
     getUserFiles (sessionId: string): Promise<FileList> {
-        return this.sessionStore.getSessionUser(sessionId).then(account => {
-            if ( account === null )
-                return Promise.reject(new Error("Session not authenticated."));
-            else 
-                return Promise.resolve(account);
-        }).then(account => {
+        return getUserBySession(this.sessionStore, sessionId).then(account => {
             return new Promise((resolve, reject) => {
                 this.db.all(`WITH perms(fid) AS (
                     SELECT fid FROM ${this.table}_shares WHERE uid=? 
@@ -60,6 +65,18 @@ export default class FileModel {
                         reject(e);
                     }
                 });
+            });
+        });
+    }
+
+    setFile (filename: string, sessionId: string): Promise<FileObject> {
+        return getUserBySession(this.sessionStore, sessionId).then(account => {
+            const fid = randomUUID();
+            return new Promise((resolve, reject) => {
+                this.db.run(`INSERT OR REPLACE INTO ${this.table} VALUES (?, ?, ?)`, [fid, account.uid, filename], err => {
+                    if ( err ) reject(err);
+                    else resolve({id: fid, owner: account.uid, filename});
+                })
             });
         });
     }
