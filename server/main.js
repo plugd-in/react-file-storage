@@ -57,7 +57,7 @@ app.use((0, express_session_1.default)({
     }
 }));
 app.use('/account', (0, account_1.default)(userModel, store));
-app.use('/files', (0, files_2.default)(fileModel));
+app.use('/files', (0, files_2.default)(fileModel, userModel));
 app.use('/', (0, express_1.static)('build'));
 app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}...`);

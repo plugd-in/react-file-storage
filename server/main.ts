@@ -51,7 +51,7 @@ app.use(session({
 }) as RequestHandler);
 
 app.use('/account', accountRouter(userModel, store));
-app.use('/files', fileRouter(fileModel));
+app.use('/files', fileRouter(fileModel, userModel));
 
 app.use('/', staticMiddleware('build'));
 

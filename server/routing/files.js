@@ -1,8 +1,74 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const crypto_1 = require("crypto");
 const express_1 = require("express");
-function fileRouter(fileModel) {
+const multer_1 = __importDefault(require("multer"));
+const path_1 = require("path");
+function fileRouter(fileModel, userModel) {
     const router = (0, express_1.Router)();
+    const storageDestination = (0, path_1.join)((0, path_1.resolve)('.'), 'server/files');
+    console.log("Mark 8:", storageDestination);
+    const storage = multer_1.default.diskStorage({
+        destination: (req, file, cb) => {
+            console.log("Mark 4");
+            cb(null, storageDestination);
+        },
+        filename: (req, file, cb) => {
+            console.log("Mark 3:", file);
+            const fileSplit = file["originalname"].split('.');
+            const uuid = (0, crypto_1.randomUUID)();
+            cb(null, uuid + (fileSplit.length > 1 ? '.' + fileSplit[fileSplit.length - 1] : ''));
+        }
+    });
+    const upload = (0, multer_1.default)({
+        storage: storage
+    });
+    router.post('/', (req, res, next) => {
+        res.set({});
+        console.log("Mark 1");
+        if (typeof req["sessionID"] !== "undefined") {
+            userModel.getUserBySession(req["sessionID"]).then(user => {
+                if (user === null)
+                    res.status(401).send("Session not authenticated.");
+                else {
+                    console.log("Mark 2");
+                    req["user"] = user;
+                    next();
+                }
+            });
+        }
+        else
+            res.status(401).send("Session not authenticated.").end();
+    }, upload.any(), (req, res) => {
+        console.log("Mark 6:", req["user"]);
+        console.log("Mark 7:", req["files"]);
+        if (typeof req["user"] !== "undefined") {
+            if (typeof req["files"] !== "undefined") {
+                const files = req["files"];
+                const fileObjects = {};
+                let inOrder = Promise.resolve(null);
+                files.forEach(file => {
+                    inOrder = inOrder.then(() => fileModel.setFile(file.originalname, req["sessionID"])).then(fileObject => {
+                        fileObjects[fileObject.id] = fileObject;
+                        return fileObject;
+                    });
+                });
+                inOrder.then(() => {
+                    res.status(201).json(fileObjects);
+                }).catch(err => {
+                    console.error(err);
+                    res.status(500).end();
+                });
+            }
+            else
+                res.status(200).end();
+        }
+        else
+            res.status(500).end();
+    });
     router.get('/', (req, res) => {
         res.set({
             "Content-Type": "application/json"

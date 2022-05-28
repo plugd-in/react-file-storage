@@ -1,5 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const crypto_1 = require("crypto");
+function getUserBySession(sessionStore, sessionId) {
+    return sessionStore.getSessionUser(sessionId).then(account => {
+        if (account === null)
+            return Promise.reject(new Error("Session not authenticated."));
+        else
+            return Promise.resolve(account);
+    });
+}
 class FileModel {
     constructor(config) {
         this.db = config.db;
@@ -29,12 +38,7 @@ class FileModel {
         });
     }
     getUserFiles(sessionId) {
-        return this.sessionStore.getSessionUser(sessionId).then(account => {
-            if (account === null)
-                return Promise.reject(new Error("Session not authenticated."));
-            else
-                return Promise.resolve(account);
-        }).then(account => {
+        return getUserBySession(this.sessionStore, sessionId).then(account => {
             return new Promise((resolve, reject) => {
                 this.db.all(`WITH perms(fid) AS (
                     SELECT fid FROM ${this.table}_shares WHERE uid=? 
@@ -51,6 +55,19 @@ class FileModel {
                         catch (e) {
                             reject(e);
                         }
+                });
+            });
+        });
+    }
+    setFile(filename, sessionId) {
+        return getUserBySession(this.sessionStore, sessionId).then(account => {
+            const fid = (0, crypto_1.randomUUID)();
+            return new Promise((resolve, reject) => {
+                this.db.run(`INSERT OR REPLACE INTO ${this.table} VALUES (?, ?, ?)`, [fid, account.uid, filename], err => {
+                    if (err)
+                        reject(err);
+                    else
+                        resolve({ id: fid, owner: account.uid, filename });
                 });
             });
         });
