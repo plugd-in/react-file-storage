@@ -13,6 +13,16 @@ export interface Account {
     passwordHash: string; // Formatted as <algorithm>$<digest>$<iterations>$<salt>$<hash>
 }
 
+export interface FileObject {
+    id: string;
+    owner: string;
+    filename: string;
+}
+
+export interface FileList {
+    [fileId: string]: FileObject
+}
+
 export interface CookieData {
     originalMaxAge: number;
     expires: Date;

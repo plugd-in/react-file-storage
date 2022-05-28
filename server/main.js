@@ -31,12 +31,18 @@ const cors_1 = __importDefault(require("cors"));
 const account_1 = __importDefault(require("./routing/account"));
 const session_1 = __importDefault(require("./models/session"));
 const express_1 = __importStar(require("express"));
+const files_1 = __importDefault(require("./models/files"));
+const files_2 = __importDefault(require("./routing/files"));
 const dbfile = (0, path_1.join)((0, path_1.resolve)('.'), process_1.env["dbFileName"] || 'sqlite.db');
 console.log("DB File:", dbfile);
 const sqlite = process_1.env.NODE_ENV == "development" ? (0, sqlite3_1.verbose)() : sqlite3_1.default;
 const db = new sqlite.Database(dbfile);
 const store = new session_1.default((typeof express_session_1.default["session"] !== "undefined") ? express_session_1.default["session"].Store : express_session_1.default.Store, { db });
 const userModel = new user_1.default(db, store);
+const fileModel = new files_1.default({
+    store,
+    db
+});
 const app = (0, express_1.default)();
 const PORT = process_1.env["PORT"] || 8080;
 app.use((0, cors_1.default)());
@@ -51,6 +57,7 @@ app.use((0, express_session_1.default)({
     }
 }));
 app.use('/account', (0, account_1.default)(userModel, store));
+app.use('/files', (0, files_2.default)(fileModel));
 app.use('/', (0, express_1.static)('build'));
 app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}...`);

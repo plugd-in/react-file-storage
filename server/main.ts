@@ -11,6 +11,8 @@ import accountRouter from './routing/account';
 import SessionStore from './models/session';
 
 import express, { Express, RequestHandler, Router, static as staticMiddleware} from 'express';
+import FileModel from './models/files';
+import fileRouter  from './routing/files';
 
 
 const dbfile = join(resolve('.'), env["dbFileName"] || 'sqlite.db');
@@ -24,6 +26,12 @@ const db: Database = new sqlite.Database(dbfile);
 const store = new SessionStore(( typeof session["session"] !== "undefined" ) ? session["session"].Store : session.Store, {db});
 
 const userModel = new UserModel(db, store);
+
+const fileModel = new FileModel({
+    store,
+    db
+});
+
 
 const app: Express = express();
 const PORT = env["PORT"] || 8080;
@@ -43,6 +51,7 @@ app.use(session({
 }) as RequestHandler);
 
 app.use('/account', accountRouter(userModel, store));
+app.use('/files', fileRouter(fileModel));
 
 app.use('/', staticMiddleware('build'));
 
