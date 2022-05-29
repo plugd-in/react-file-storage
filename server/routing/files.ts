@@ -31,7 +31,7 @@ export default function fileRouter (fileModel: FileModel, userModel: UserModel) 
             
             const fileSplit = file["originalname"].split('.');
             const uuid = randomUUID();
-            cb(null, uuid + (fileSplit.length > 1 ? '.' + fileSplit[fileSplit.length - 1] : ''));
+            cb(null, uuid);
         }
     });
     const upload = multer({
@@ -62,7 +62,7 @@ export default function fileRouter (fileModel: FileModel, userModel: UserModel) 
                 } = {};
                 let inOrder = Promise.resolve<FileObject>(null);
                 files.forEach(file => {
-                    inOrder = inOrder.then(() => fileModel.setFile(file.originalname, req["sessionID"])).then(fileObject => {
+                    inOrder = inOrder.then(() => fileModel.setFile(file.originalname, req["sessionID"], file.filename)).then(fileObject => {
                         fileObjects[fileObject.id] = fileObject;
                         return fileObject;
                     });

@@ -59,9 +59,8 @@ class FileModel {
             });
         });
     }
-    setFile(filename, sessionId) {
+    setFile(filename, sessionId, fid = (0, crypto_1.randomUUID)()) {
         return getUserBySession(this.sessionStore, sessionId).then(account => {
-            const fid = (0, crypto_1.randomUUID)();
             return new Promise((resolve, reject) => {
                 this.db.run(`INSERT OR REPLACE INTO ${this.table} VALUES (?, ?, ?)`, [fid, account.uid, filename], err => {
                     if (err)

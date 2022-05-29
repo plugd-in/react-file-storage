@@ -69,9 +69,8 @@ export default class FileModel {
         });
     }
 
-    setFile (filename: string, sessionId: string): Promise<FileObject> {
+    setFile (filename: string, sessionId: string, fid: string = randomUUID()): Promise<FileObject> {
         return getUserBySession(this.sessionStore, sessionId).then(account => {
-            const fid = randomUUID();
             return new Promise((resolve, reject) => {
                 this.db.run(`INSERT OR REPLACE INTO ${this.table} VALUES (?, ?, ?)`, [fid, account.uid, filename], err => {
                     if ( err ) reject(err);
