@@ -7,9 +7,18 @@ import SessionStore from "./session";
 export default class UserModel {
     private db: Database;
     private sessionStore: SessionStore;
-    constructor (db: Database, sessionStore: SessionStore) {
+    private table: string;
+    constructor (db: Database, sessionStore: SessionStore, table: string = 'users') {
         this.db = db;
         this.sessionStore = sessionStore;
+        this.table = table;
+        this.db.exec(`CREATE TABLE IF NOT EXISTS ${this.table} (
+            uid TEXT PRIMARY KEY,
+            username TEXT NOT NULL,
+            password_hash TEXT
+        )`, (err: Error) => {
+            if (err) throw err;
+        });
     }
 
     getUser (username): Promise<Account> {

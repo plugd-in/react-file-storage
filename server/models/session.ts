@@ -137,7 +137,6 @@ export default class SessionStore extends Store {
 
     authenticateSession (sessionId: string, uid: string): void {
         const now = new Date().getTime();
-        console.log("Merk 3:", sessionId, uid);
         this.db.run(`UPDATE ${this.table} SET uid = ? WHERE sid = ? AND ? <= expired`, [uid, sessionId, now], (err: Error) => {
             if (err) console.error(err);
         });

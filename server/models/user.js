@@ -2,9 +2,18 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const crypto_1 = require("crypto");
 class UserModel {
-    constructor(db, sessionStore) {
+    constructor(db, sessionStore, table = 'users') {
         this.db = db;
         this.sessionStore = sessionStore;
+        this.table = table;
+        this.db.exec(`CREATE TABLE IF NOT EXISTS ${this.table} (
+            uid TEXT PRIMARY KEY,
+            username TEXT NOT NULL,
+            password_hash TEXT
+        )`, (err) => {
+            if (err)
+                throw err;
+        });
     }
     getUser(username) {
         return new Promise((resolve, reject) => {

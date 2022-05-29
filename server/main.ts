@@ -13,9 +13,15 @@ import SessionStore from './models/session';
 import express, { Express, RequestHandler, Router, static as staticMiddleware} from 'express';
 import FileModel from './models/files';
 import fileRouter  from './routing/files';
+import { existsSync, writeFileSync } from 'fs';
+
 
 
 const dbfile = join(resolve('.'), env["dbFileName"] || 'sqlite.db');
+
+if ( existsSync(dbfile) !== true ) {
+    writeFileSync(dbfile, Buffer.alloc(0));
+}
 
 console.log("DB File:", dbfile);
 

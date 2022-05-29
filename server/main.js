@@ -33,7 +33,11 @@ const session_1 = __importDefault(require("./models/session"));
 const express_1 = __importStar(require("express"));
 const files_1 = __importDefault(require("./models/files"));
 const files_2 = __importDefault(require("./routing/files"));
+const fs_1 = require("fs");
 const dbfile = (0, path_1.join)((0, path_1.resolve)('.'), process_1.env["dbFileName"] || 'sqlite.db');
+if ((0, fs_1.existsSync)(dbfile) !== true) {
+    (0, fs_1.writeFileSync)(dbfile, Buffer.alloc(0));
+}
 console.log("DB File:", dbfile);
 const sqlite = process_1.env.NODE_ENV == "development" ? (0, sqlite3_1.verbose)() : sqlite3_1.default;
 const db = new sqlite.Database(dbfile);
