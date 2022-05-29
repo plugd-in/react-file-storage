@@ -62,7 +62,6 @@ function fileRouter(fileModel, userModel) {
             res.status(500).end();
     });
     router.get('/:fileId([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})', (req, res) => {
-        console.log(req.params);
         if (typeof req["sessionID"] !== "undefined") {
             fileModel.getFile(req.params.fileId, req["sessionID"]).then(file => {
                 res.download(`${storageDestination}/${file.id}`, file.filename, err => {
