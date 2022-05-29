@@ -71,5 +71,25 @@ class FileModel {
             });
         });
     }
+    getFile(fid, sessionId) {
+        return getUserBySession(this.sessionStore, sessionId).then(user => {
+            return new Promise((resolve, reject) => {
+                this.db.get(`WITH perms(fid) AS (
+                    SELECT fid FROM ${this.table}_shares WHERE uid=$uid 
+                    UNION SELECT id FROM ${this.table} WHERE owner=$uid
+                ) SELECT f.* FROM perms p INNER JOIN ${this.table} f ON p.fid = f.id WHERE f.id = $fid`, {
+                    $fid: fid,
+                    $uid: user.uid
+                }, (err, row) => {
+                    if (err)
+                        reject(err);
+                    else if (row)
+                        resolve(row);
+                    else
+                        reject(new Error("No such file."));
+                });
+            });
+        });
+    }
 }
 exports.default = FileModel;

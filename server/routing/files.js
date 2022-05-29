@@ -61,6 +61,30 @@ function fileRouter(fileModel, userModel) {
         else
             res.status(500).end();
     });
+    router.get('/:fileId([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})', (req, res) => {
+        console.log(req.params);
+        if (typeof req["sessionID"] !== "undefined") {
+            fileModel.getFile(req.params.fileId, req["sessionID"]).then(file => {
+                res.download(`${storageDestination}/${file.id}`, file.filename, err => {
+                    if (err) {
+                        console.error(err);
+                        res.status(500).end();
+                    }
+                });
+            }).catch((err) => {
+                if (err.message == "No such file.")
+                    res.status(404).end();
+                else if (err.message == "Session not authenticated.")
+                    res.status(401).send("Session not authenticated.").end();
+                else {
+                    console.error(err);
+                    res.status(500).end();
+                }
+            });
+        }
+        else
+            res.status(401).send("Session not authenticated.").end();
+    });
     router.get('/', (req, res) => {
         res.set({
             "Content-Type": "application/json"
