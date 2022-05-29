@@ -21,16 +21,13 @@ interface MulterFile {
 export default function fileRouter (fileModel: FileModel, userModel: UserModel) {
     const router = Router();
     const storageDestination = join(resolve('.'), 'server/files');
-    console.log("Mark 8:", storageDestination);
     
     const storage = multer.diskStorage({
         destination:  (req, file, cb) => {
-            console.log("Mark 4");
             
             cb(null, storageDestination);
         },
         filename: (req, file: string, cb) => {
-            console.log("Mark 3:", file);
             
             const fileSplit = file["originalname"].split('.');
             const uuid = randomUUID();
@@ -42,16 +39,11 @@ export default function fileRouter (fileModel: FileModel, userModel: UserModel) 
     });
     
     router.post('/', (req, res, next) => {
-        res.set({
-
-        });
-        console.log("Mark 1");
         
         if ( typeof req["sessionID"] !== "undefined" ) {
             userModel.getUserBySession(req["sessionID"]).then(user => {
                 if ( user === null ) res.status(401).send("Session not authenticated.");
                 else {
-                    console.log("Mark 2");
                     
                     req["user"] = user;
                     
@@ -60,8 +52,6 @@ export default function fileRouter (fileModel: FileModel, userModel: UserModel) 
             })
         } else res.status(401).send("Session not authenticated.").end();
     }, upload.any(), (req, res) => {
-        console.log("Mark 6:", req["user"]);
-        console.log("Mark 7:", req["files"]);
         
         
         if ( typeof req["user"] !== "undefined") {

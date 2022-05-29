@@ -7,6 +7,7 @@ import useSWR, { mutate } from 'swr';
 
 import { FileList } from './interfaces';
 import { useUser } from './store/account.store';
+import FileUpload from './components/file-upload.component';
 
 
 export const config = {
@@ -32,7 +33,6 @@ function App (props: AppProps) {
   const { data, error } = useSWR<FileList>(`${config.apiRoot}/files`, url => fetch(url).then(response => response.json()));
 
   useEffect(() => {
-    console.log("Mark 1:", data);
     
   }, [data]);
 
@@ -43,6 +43,8 @@ function App (props: AppProps) {
   }
 
   useEffect(() => {
+    if ( user.loggedIn ) 
+      mutate(`${config.apiRoot}/files`);
     user.validateSession();
   }, [user.loggedIn]);
 
@@ -60,10 +62,7 @@ function App (props: AppProps) {
       <div className='container mt-1 p-3 border'>
         {data ? Object.keys(data).map(key => <p>{data[key].filename}</p>) : <></>}
       </div>
-      <form className='container mt-1 border rounded p-3' action={config.apiRoot + '/files'} method="post" encType="multipart/form-data">
-        <input className='form-control mb-1' type="file" name="file" id="file" />
-        <button className='btn btn-primary' type="submit">Upload</button>
-      </form>
+      <FileUpload />
     </div>);
 }
 

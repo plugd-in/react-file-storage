@@ -17,7 +17,7 @@ const fetchStatus = (response: Response) => {
     return Promise.reject(new Error(response.statusText));
 }
 
-const useAccount = create<AccountState>(set => ({
+const useAccount = create<AccountState>((set, get) => ({
     username: "",
     passwordHash: "",
     uid: "",
@@ -47,7 +47,8 @@ const useAccount = create<AccountState>(set => ({
         }).then(fetchStatus).then((userInfo: Account) => {
             return {...userInfo, loggedIn: true};
         });
-        set(newState);
+        
+        if ( newState ) set(newState);
     }
 }));
 
