@@ -75,7 +75,7 @@ export default class UserModel {
         })
     }
 
-    createUser (username: string, password: string) {
+    createUser (username: string, password: string, sessionId: string | null = null) {
         return new Promise((resolve, reject) => {
             this.db.serialize(() => {
                 const salt = randomBytes(16).toString('hex');
@@ -85,15 +85,19 @@ export default class UserModel {
                     if ( err )
                         reject(err);
                     else {
+                        const uuid = randomUUID();
                         this.db.run(`INSERT INTO ${this.table} (uid, username, password_hash) VALUES (?, ?, ?)`, [
-                            randomUUID(),
+                            uuid,
                             username,
                             `pbkdf2$${digest}$${iterations}$${salt}$${key.toString('hex')}`
                         ], (err) => {
                             if ( err )
                                 reject(err);
-                            else
-                                resolve(null);
+                            else {
+                                if (sessionId !== null ) {
+                                    this.sessionStore.authenticateSession(sessionId, uuid).then(resolve).catch(reject);
+                                } else resolve(null);
+                            }
                         })
                     }
                 })

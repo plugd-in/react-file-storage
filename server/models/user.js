@@ -57,7 +57,7 @@ class UserModel {
             });
         });
     }
-    createUser(username, password) {
+    createUser(username, password, sessionId = null) {
         return new Promise((resolve, reject) => {
             this.db.serialize(() => {
                 const salt = (0, crypto_1.randomBytes)(16).toString('hex');
@@ -67,15 +67,21 @@ class UserModel {
                     if (err)
                         reject(err);
                     else {
+                        const uuid = (0, crypto_1.randomUUID)();
                         this.db.run(`INSERT INTO ${this.table} (uid, username, password_hash) VALUES (?, ?, ?)`, [
-                            (0, crypto_1.randomUUID)(),
+                            uuid,
                             username,
                             `pbkdf2$${digest}$${iterations}$${salt}$${key.toString('hex')}`
                         ], (err) => {
                             if (err)
                                 reject(err);
-                            else
-                                resolve(null);
+                            else {
+                                if (sessionId !== null) {
+                                    this.sessionStore.authenticateSession(sessionId, uuid).then(resolve).catch(reject);
+                                }
+                                else
+                                    resolve(null);
+                            }
                         });
                     }
                 });

@@ -124,10 +124,16 @@ class SessionStore extends Store {
         });
     }
     authenticateSession(sessionId, uid) {
-        const now = new Date().getTime();
-        this.db.run(`UPDATE ${this.table} SET uid = ? WHERE sid = ? AND ? <= expired`, [uid, sessionId, now], (err) => {
-            if (err)
-                console.error(err);
+        return new Promise((resolve, reject) => {
+            const now = new Date().getTime();
+            this.db.run(`UPDATE ${this.table} SET uid = ? WHERE sid = ? AND ? <= expired`, [uid, sessionId, now], (err) => {
+                if (err) {
+                    console.error(err);
+                    reject(err);
+                }
+                else
+                    resolve(null);
+            });
         });
     }
 }

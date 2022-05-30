@@ -1,7 +1,6 @@
 import sqlite3, { Database, verbose } from 'sqlite3';
 import { join, resolve } from 'path';
 import { env, config } from 'process';
-import { Account } from './interfaces';
 import UserModel from './models/user';
 import session from 'express-session'
 import cors from 'cors'

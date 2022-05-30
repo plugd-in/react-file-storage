@@ -46,6 +46,33 @@ function accountRouter(userModel, sessionStore) {
             res.status(401).send("No authenticated session.").end();
         }
     });
+    router.post('/', (req, res) => {
+        res.set({
+            "Content-Type": "application/json"
+        });
+        const jsonBody = req.body;
+        if (typeof jsonBody == "object" &&
+            typeof jsonBody["username"] !== "undefined" &&
+            typeof jsonBody["password"] !== "undefined") {
+            if (typeof req["sessionID"] !== "undefined")
+                userModel.createUser(jsonBody.username, jsonBody.password, req["sessionID"]).then(() => {
+                    res.status(201).end();
+                }).catch(err => {
+                    if (err instanceof Error && err["errno"] == 19) {
+                        res.status(409).end("Username already in use.");
+                    }
+                    else {
+                        res.status(500).end();
+                    }
+                });
+            else {
+                res.status(400).send("Session required for account creation.").end();
+            }
+        }
+        else {
+            res.status(400).end();
+        }
+    });
     return router;
 }
 exports.default = accountRouter;
