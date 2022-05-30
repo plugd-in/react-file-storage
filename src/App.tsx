@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { AsyncThunkAction } from '@reduxjs/toolkit';
 import useSWR, { mutate } from 'swr';
 
-import { FileList } from './interfaces';
+import FileList from './components/file-list.component';
 import { useUser } from './store/account.store';
 import FileUpload from './components/file-upload.component';
 
@@ -20,28 +20,18 @@ interface AppProps {
 interface AppState {
   username: string;
   password: string;
-  files: FileList
 };
 
 function App (props: AppProps) {
   const [ state, setState ] = React.useState<AppState>({
     username: "",
-    password: "",
-    files: {}
+    password: ""
   });
 
-  const { data, error } = useSWR<FileList>(`${config.apiRoot}/files`, url => fetch(url).then(response => response.json()));
 
-  useEffect(() => {
-    
-  }, [data]);
 
   const user = useUser();
-
-  function handleSubmit () {
-    mutate(`${config.apiRoot}/files`);
-  }
-
+  
   useEffect(() => {
     if ( user.loggedIn ) 
       mutate(`${config.apiRoot}/files`);
@@ -59,9 +49,7 @@ function App (props: AppProps) {
         <input className='form-control btn btn-primary' type="button" value="Login" onClick={() => user.authenticateUser(state.username, state.password)}/>
         { user.loggedIn ? <p>{user.username}</p>:<></> }
       </div>
-      <div className='container mt-1 p-3 border'>
-        {data ? Object.keys(data).map(key => <p>{data[key].filename}</p>) : <></>}
-      </div>
+      <FileList />
       <FileUpload />
     </div>);
 }
