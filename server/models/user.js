@@ -8,7 +8,7 @@ class UserModel {
         this.table = table;
         this.db.exec(`CREATE TABLE IF NOT EXISTS ${this.table} (
             uid TEXT PRIMARY KEY,
-            username TEXT NOT NULL,
+            username TEXT NOT NULL UNIQUE,
             password_hash TEXT
         )`, (err) => {
             if (err)
@@ -18,7 +18,7 @@ class UserModel {
     getUser(username) {
         return new Promise((resolve, reject) => {
             this.db.serialize(() => {
-                this.db.get("SELECT * FROM users WHERE username = ?", username, (err, row) => {
+                this.db.get(`SELECT * FROM ${this.table} WHERE username = ?`, username, (err, row) => {
                     if (err)
                         reject(err);
                     else if (typeof row == "undefined")
@@ -67,7 +67,7 @@ class UserModel {
                     if (err)
                         reject(err);
                     else {
-                        this.db.run("INSERT INTO users (uid, username, password_hash) VALUES (?, ?, ?)", [
+                        this.db.run(`INSERT INTO ${this.table} (uid, username, password_hash) VALUES (?, ?, ?)`, [
                             (0, crypto_1.randomUUID)(),
                             username,
                             `pbkdf2$${digest}$${iterations}$${salt}$${key.toString('hex')}`
@@ -75,7 +75,7 @@ class UserModel {
                             if (err)
                                 reject(err);
                             else
-                                resolve({});
+                                resolve(null);
                         });
                     }
                 });

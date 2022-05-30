@@ -19,7 +19,7 @@ import { existsSync, writeFileSync } from 'fs';
 
 const dbfile = join(resolve('.'), env["dbFileName"] || 'sqlite.db');
 
-if ( existsSync(dbfile) !== true ) {
+if ( existsSync(dbfile) == false ) {
     writeFileSync(dbfile, Buffer.alloc(0));
 }
 
@@ -65,8 +65,7 @@ app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}...`);
 })
 
-userModel.createUser("plunged", "guest").then(() => userModel.getUser('plunged')).then((user) => {
-    console.log(user);
+userModel.createUser("plunged", "guest").then(res => userModel.getUser('plunged')).then((user) => {
 }).catch((err) => {
     console.error(err);
 });
