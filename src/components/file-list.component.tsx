@@ -10,8 +10,11 @@ export default function FileListComponent () {
     const files = useMemo(() => {
         return Object.keys(data||{}).map(key => {
             return (
-                <li className="list-group-item">
-                    <a href={`${config.apiRoot}/files/${(data||{})[key].id}`}>{(data||{})[key].filename}</a>
+                <li className="list-group-item position-relative d-flex align-items-stretch">
+                    <div className="position-relative flex-grow-1 align-items-center d-flex">
+                        <a className="stretched-link" href={`${config.apiRoot}/files/${(data||{})[key].id}`}>{(data||{})[key].filename}</a>
+                    </div>
+                    <button className="btn btn-danger">Delete</button>
                 </li>
             );
         });
