@@ -13,3 +13,7 @@ export interface FileObject {
 export interface FileList {
     [id: string]: FileObject;
 }
+
+export interface ViewerProps {
+    file: Blob | FileObject;
+}

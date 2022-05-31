@@ -7,6 +7,7 @@ const crypto_1 = require("crypto");
 const express_1 = require("express");
 const multer_1 = __importDefault(require("multer"));
 const path_1 = require("path");
+const mime_types_1 = __importDefault(require("mime-types"));
 function fileRouter(fileModel, userModel) {
     const router = (0, express_1.Router)();
     const storageDestination = (0, path_1.join)((0, path_1.resolve)('.'), 'server/files');
@@ -64,7 +65,7 @@ function fileRouter(fileModel, userModel) {
     router.get('/:fileId([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})', (req, res) => {
         if (typeof req["sessionID"] !== "undefined") {
             fileModel.getFile(req.params.fileId, req["sessionID"]).then(file => {
-                res.download(`${storageDestination}/${file.id}`, file.filename, err => {
+                res.set('Content-Type', mime_types_1.default["contentType"](file.filename)).sendFile(`${storageDestination}/${file.id}`, err => {
                     if (err) {
                         console.error(err);
                         res.status(500).end();

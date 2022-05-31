@@ -5,6 +5,8 @@ import { join, resolve } from "path";
 import { FileObject } from "../interfaces";
 import FileModel from "../models/files";
 import UserModel from "../models/user";
+import mime from 'mime-types';
+
 
 interface MulterFile {
     fieldname: string;
@@ -82,7 +84,7 @@ export default function fileRouter (fileModel: FileModel, userModel: UserModel) 
         if ( typeof req["sessionID"] !== "undefined" ) {
             
             fileModel.getFile(req.params.fileId, req["sessionID"]).then(file => {
-                res.download(`${storageDestination}/${file.id}`, file.filename, err => {
+                res.set('Content-Type', (mime["contentType"] as (path: string) => string)(file.filename)).sendFile(`${storageDestination}/${file.id}`, err => {
                     if (err) {
                         console.error(err);
                         res.status(500).end();

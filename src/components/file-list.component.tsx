@@ -3,6 +3,7 @@ import useSWR, {mutate} from "swr";
 
 import { config } from "../App";
 import { FileList } from "../interfaces";
+import FileViewer from "./file-viewer.component";
 
 
 
@@ -25,7 +26,14 @@ export default function FileListComponent () {
             return (
                 <li className="list-group-item position-relative d-flex align-items-stretch">
                     <div className="position-relative flex-grow-1 align-items-center d-flex">
-                        <a className="stretched-link" href={`${config.apiRoot}/files/${(data||{})[key].id}`}>{(data||{})[key].filename}</a>
+                        <FileViewer file={(data||{})[key]}>
+                            <a
+                                className="stretched-link"
+                                href={`${config.apiRoot}/files/${(data||{})[key].id}`}
+                            >
+                                {(data||{})[key].filename}
+                            </a>
+                            </FileViewer>
                     </div>
                     <button className="btn btn-danger" onClick={() => deleteFile((data||{})[key].id)}>Delete</button>
                 </li>
