@@ -25,17 +25,12 @@ export default function CreateAccount (props: CreateAccountProps) {
     });
 
     const user = useUser();
-
-    const createUser = (username: string, password: string) => fetch(`${config.apiRoot}/account`, {
-        headers: {
-            "Content-Type": "application/json"
-        },
-        method: "post",
-        body: JSON.stringify({username, password})
-    }).then(fetchStatus).then(response => {
-        user.validateSession();
-    });
     
+    const createUser = (...args: [string, string]) => user.createUser(...args).then(() => setState({
+        username: "",
+        password: ""
+    }))
+
     useEffect(() => {
         if ( user.loggedIn == true ) {}
     }, [user.loggedIn]);
@@ -47,7 +42,7 @@ export default function CreateAccount (props: CreateAccountProps) {
         <div className='container mt-1 border rounded p-3'>
           <input className='form-control mb-1' type="text" value={state.username} onChange={e => handleChange(0, e)}/>
           <input className='form-control mb-1' type="text" value={state.password} onChange={e => handleChange(1, e)}/>
-          <input className='form-control btn btn-primary' type="button" value="Login" onClick={() => createUser(state.username, state.password)}/>
+          <input className='form-control btn btn-primary' type="button" value="Create Account" onClick={() => createUser(state.username, state.password)}/>
         </div>
     );
 }

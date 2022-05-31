@@ -8,13 +8,14 @@ interface AccountState {
     passwordHash: string;
     loggedIn: boolean;
     authenticateUser: (username: string, password: string) => void;
-    validateSession: () => void;
+    validateSession: () => Promise<void>;
+    createUser: (username: string, password: string) => Promise<void>;
 }
 
 const fetchStatus = (response: Response) => {
     if ( response.status >= 200 && response.status < 300)
-        return Promise.resolve(response.json())
-    return Promise.reject(new Error(response.statusText));
+        return Promise.resolve(response.json().catch(() => null));
+    else return Promise.reject(new Error(response.statusText));
 }
 
 const useAccount = create<AccountState>((set, get) => ({
@@ -37,18 +38,25 @@ const useAccount = create<AccountState>((set, get) => ({
         set(newState);
     },
     // Fetch the logged in user, if the user is logged in.
-    validateSession: async () => {
-        const newState = await fetch(`${config.apiRoot}/account`, {
+    validateSession: () => {
+        return fetch(`${config.apiRoot}/account`, {
             headers: {
                 "Content-Type": "application/json",
                 "Access-Control-Origin": "*"
             },
             mode: "cors"
         }).then(fetchStatus).then((userInfo: Account) => {
-            return {...userInfo, loggedIn: true};
+            set({...userInfo, loggedIn: true});
         });
-        
-        if ( newState ) set(newState);
+    }, 
+    createUser: function (username: string, password: string) {
+        return fetch(`${config.apiRoot}/account`, {
+            headers: {
+                "Content-Type": "application/json"
+            },
+            method: "post",
+            body: JSON.stringify({username, password})
+        }).then(fetchStatus).then(this.validateSession);
     }
 }));
 

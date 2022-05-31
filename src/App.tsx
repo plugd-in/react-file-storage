@@ -9,27 +9,20 @@ import FileList from './components/file-list.component';
 import { useUser } from './store/account.store';
 import FileUpload from './components/file-upload.component';
 import CreateAccount from './components/create-account.component';
+import LoginComponent from './components/login.component';
+import AppContainer from './components/app-container.component';
 
 
 export const config = {
   apiRoot: "http://localhost:8080"
 };
 
+
 interface AppProps {
 
 };
-interface AppState {
-  username: string;
-  password: string;
-};
 
 function App (props: AppProps) {
-  const [ state, setState ] = React.useState<AppState>({
-    username: "",
-    password: ""
-  });
-
-
 
   const user = useUser();
   
@@ -39,21 +32,18 @@ function App (props: AppProps) {
     user.validateSession();
   }, [user.loggedIn, user.username]);
 
-  const handleChange = (which: number, event: ChangeEvent<HTMLInputElement>) => {
-    setState(Object.assign({}, state, which ? {password: event.target.value} : {username: event.target.value}));
-  }
-  return (
-    <div className='container'>
+  if ( !user.loggedIn ) return (
+    <AppContainer>
       <CreateAccount />
-      <div className='container mt-1 border rounded p-3'>
-        <input className='form-control mb-1' type="text" value={state.username} onChange={e => handleChange(0, e)}/>
-        <input className='form-control mb-1' type="text" value={state.password} onChange={e => handleChange(1, e)}/>
-        <input className='form-control btn btn-primary' type="button" value="Login" onClick={() => user.authenticateUser(state.username, state.password)}/>
-        { user.loggedIn ? <p>{user.username}</p>:<></> }
-      </div>
+      <LoginComponent />
+    </AppContainer>
+  );
+  return (
+    <AppContainer>
       <FileList />
       <FileUpload />
-    </div>);
+    </AppContainer>
+  );
 }
 
 export default App;

@@ -47,9 +47,6 @@ function accountRouter(userModel, sessionStore) {
         }
     });
     router.post('/', (req, res) => {
-        res.set({
-            "Content-Type": "application/json"
-        });
         const jsonBody = req.body;
         if (typeof jsonBody == "object" &&
             typeof jsonBody["username"] !== "undefined" &&
