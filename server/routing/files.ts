@@ -119,6 +119,16 @@ export default function fileRouter (fileModel: FileModel, userModel: UserModel) 
         } else res.status(401).send("Session not authenticated.").end();
     });
 
+    router.delete('/:fileId([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})', (req, res) => {
+        if ( typeof req["sessionID"] !== "undefined" ) {
+            fileModel.deleteFile(req.params["fileId"], req["sessionID"]).then(() => {
+                res.status(200).end();
+            }).catch(err => {
+                console.error(err);
+                res.status(500).end();
+            });
+        } else res.status(401).send("Session not authenticated.").end();
+    });
 
 
     return router;

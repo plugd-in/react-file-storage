@@ -2,6 +2,8 @@ import { sqlite3, Database } from "sqlite3";
 import SessionStore from "./session";
 import { FileObject, FileList } from '../interfaces';
 import { randomUUID } from "crypto";
+import { rm } from 'fs/promises';
+import { join, resolve } from "path";
 
 interface FileModelConfig {
     db: Database;
@@ -22,10 +24,12 @@ export default class FileModel {
     private db: Database;
     private table: string;
     private sessionStore: SessionStore;
+    private storageDestination: string;
     constructor (config: FileModelConfig) {
         this.db = config.db;
         this.table = config.table || 'files';
         this.sessionStore = config.store;
+        this.storageDestination = join(resolve('.'), 'server/files');
 
         this.db.serialize(() => {
             this.db.exec(`CREATE TABLE IF NOT EXISTS ${this.table} (
@@ -96,6 +100,22 @@ export default class FileModel {
                 });
             });
         });
+    }
+
+    deleteFile (fid: string, sessionId: string): Promise<void> {
+        return getUserBySession(this.sessionStore, sessionId).then(user => {
+            return new Promise((resolve, reject) => {
+                this.db.run(`DELETE FROM ${this.table} WHERE id = $fid AND owner = $uid`,{
+                    $uid: user.uid,
+                    $fid: fid
+                }, (err) => {
+                    if (err) reject(err);
+                    else {
+                        rm(`${this.storageDestination}/${fid}`).then(() => resolve()).catch(reject);
+                    }
+                });
+            });
+        })
     }
 
 }

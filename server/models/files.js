@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const crypto_1 = require("crypto");
+const promises_1 = require("fs/promises");
+const path_1 = require("path");
 function getUserBySession(sessionStore, sessionId) {
     return sessionStore.getSessionUser(sessionId).then(account => {
         if (account === null)
@@ -14,6 +16,7 @@ class FileModel {
         this.db = config.db;
         this.table = config.table || 'files';
         this.sessionStore = config.store;
+        this.storageDestination = (0, path_1.join)((0, path_1.resolve)('.'), 'server/files');
         this.db.serialize(() => {
             this.db.exec(`CREATE TABLE IF NOT EXISTS ${this.table} (
                 id TEXT PRIMARY KEY,
@@ -87,6 +90,22 @@ class FileModel {
                         resolve(row);
                     else
                         reject(new Error("No such file."));
+                });
+            });
+        });
+    }
+    deleteFile(fid, sessionId) {
+        return getUserBySession(this.sessionStore, sessionId).then(user => {
+            return new Promise((resolve, reject) => {
+                this.db.run(`DELETE FROM ${this.table} WHERE id = $fid AND owner = $uid`, {
+                    $uid: user.uid,
+                    $fid: fid
+                }, (err) => {
+                    if (err)
+                        reject(err);
+                    else {
+                        (0, promises_1.rm)(`${this.storageDestination}/${fid}`).then(() => resolve()).catch(reject);
+                    }
                 });
             });
         });
