@@ -11,10 +11,11 @@ import FileUpload from './components/file-upload.component';
 import CreateAccount from './components/create-account.component';
 import LoginComponent from './components/login.component';
 import AppContainer from './components/app-container.component';
+import Navbar from './components/navbar.component';
 
 
 export const config = {
-  apiRoot: "http://localhost:8080"
+  apiRoot:""
 };
 
 
@@ -40,6 +41,7 @@ function App (props: AppProps) {
   );
   return (
     <AppContainer>
+      <Navbar />
       <FileList />
       <FileUpload />
     </AppContainer>
