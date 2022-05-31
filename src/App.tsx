@@ -42,8 +42,8 @@ function App (props: AppProps) {
   return (
     <AppContainer>
       <Navbar />
-      <FileList />
       <FileUpload />
+      <FileList />
     </AppContainer>
   );
 }
