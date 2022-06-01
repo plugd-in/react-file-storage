@@ -7,12 +7,9 @@ interface FallbackViewerState {
 }
 
 export default function FallbackViewer (props: ViewerProps) {
-    const [state, setState] = useState<FallbackViewerState>({
-        url: props.file instanceof Blob ? URL.createObjectURL(props.file) : `${config.apiRoot}/files/${props.file.id}`
-    });
     
 
     return (
-        <a className='btn btn-primary' href={state.url} download={props.file instanceof Blob ? null : props.file.filename}>Download File</a>
+        <a className='btn btn-primary' target='_blank' href={props.file instanceof Blob ? URL.createObjectURL(props.file) : `${config.apiRoot}/files/${props.file.id}`}/* download={props.file instanceof Blob ? null : props.file.filename}*/>Open/Download File</a>
     );
 }
