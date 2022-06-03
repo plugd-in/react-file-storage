@@ -5,6 +5,7 @@ import { randomUUID } from "crypto";
 import { rm } from 'fs/promises';
 import { join, resolve } from "path";
 import UserModel from "./user";
+import { reject } from "lodash";
 
 interface FileModelConfig {
     db: Database;
@@ -121,15 +122,30 @@ export default class FileModel {
         })
     }
 
-    shareFile (fid: string, username: string): Promise<void> {
-        return this.userModel.getUser(username).then(user => {
-            return new Promise((resolve, reject) => {
-                this.db.run(`INSERT OR REPLACE INTO ${this.table}_shares VALUES (?, ?)`, [fid, user.uid], (err) => {
+    ownsFile (fid: string, sessionId: string): Promise<boolean> {
+        return this.userModel.getUserBySession(sessionId).then(user => {
+            if ( user ) return new Promise((resolve, reject) => {
+                this.db.get(`SELECT * FROM ${this.table} WHERE owner=?`, [user.uid], (err, row) => {
                     if (err) reject(err);
-                    else resolve();
+                    else resolve( row !== null);
                 })
             });
-        })
+            else return Promise.reject("Session not authenticated.")
+        });
+    }
+
+    shareFile (fid: string, sessionId: string, username: string): Promise<boolean> {
+        return this.ownsFile(fid, sessionId).then(owner => {
+            if (owner) return this.userModel.getUser(username).then(user => {
+                return new Promise((resolve, reject) => {
+                    this.db.run(`INSERT OR REPLACE INTO ${this.table}_shares VALUES (?, ?)`, [fid, user.uid], (err) => {
+                        if (err) reject(err);
+                        else resolve(true);
+                    })
+                });
+            });
+            else return Promise.resolve(false);
+        });
     }
 
 }
