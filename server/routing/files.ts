@@ -136,14 +136,14 @@ export default function fileRouter (fileModel: FileModel, userModel: UserModel) 
         if ( typeof req["sessionID"] !== "undefined" ) {
             const jsonBody: {
                 fid: string;
-                uid: string;
+                username: string;
             } = req.body;
             if (
                 typeof jsonBody === "object" &&
                 typeof jsonBody.fid === 'string' && 
-                typeof jsonBody.uid === 'string'
+                typeof jsonBody.username === 'string'
             ) {
-                fileModel.shareFile(jsonBody.fid, req["sessionID"], jsonBody.uid).then(success => {
+                fileModel.shareFile(jsonBody.fid, req["sessionID"], jsonBody.username).then(success => {
                     if (success) res.status(200).end();
                     else res.status(401).end();
                 }).catch(err => {
