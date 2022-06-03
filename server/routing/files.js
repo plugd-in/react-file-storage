@@ -116,6 +116,27 @@ function fileRouter(fileModel, userModel) {
         else
             res.status(401).send("Session not authenticated.").end();
     });
+    router.post("/share", (req, res) => {
+        if (typeof req["sessionID"] !== "undefined") {
+            const jsonBody = req.body;
+            if (typeof jsonBody === "object" &&
+                typeof jsonBody.fid === 'string' &&
+                typeof jsonBody.username === 'string') {
+                fileModel.shareFile(jsonBody.fid, req["sessionID"], jsonBody.username).then(success => {
+                    if (success)
+                        res.status(200).end();
+                    else
+                        res.status(401).end();
+                }).catch(err => {
+                    res.status(500).end();
+                });
+            }
+            else
+                res.status(400).end();
+        }
+        else
+            res.status(401).send("Session not authenticated.").end();
+    });
     return router;
 }
 exports.default = fileRouter;

@@ -17,6 +17,7 @@ class FileModel {
         this.table = config.table || 'files';
         this.sessionStore = config.store;
         this.storageDestination = (0, path_1.join)((0, path_1.resolve)('.'), 'server/files');
+        this.userModel = config.userModel;
         this.db.serialize(() => {
             this.db.exec(`CREATE TABLE IF NOT EXISTS ${this.table} (
                 id TEXT PRIMARY KEY,
@@ -108,6 +109,38 @@ class FileModel {
                     }
                 });
             });
+        });
+    }
+    ownsFile(fid, sessionId) {
+        return this.userModel.getUserBySession(sessionId).then(user => {
+            if (user)
+                return new Promise((resolve, reject) => {
+                    this.db.get(`SELECT * FROM ${this.table} WHERE owner=?`, [user.uid], (err, row) => {
+                        if (err)
+                            reject(err);
+                        else
+                            resolve(row !== null);
+                    });
+                });
+            else
+                return Promise.reject("Session not authenticated.");
+        });
+    }
+    shareFile(fid, sessionId, username) {
+        return this.ownsFile(fid, sessionId).then(owner => {
+            if (owner)
+                return this.userModel.getUser(username).then(user => {
+                    return new Promise((resolve, reject) => {
+                        this.db.run(`INSERT OR REPLACE INTO ${this.table}_shares VALUES (?, ?)`, [fid, user.uid], (err) => {
+                            if (err)
+                                reject(err);
+                            else
+                                resolve(true);
+                        });
+                    });
+                });
+            else
+                return Promise.resolve(false);
         });
     }
 }

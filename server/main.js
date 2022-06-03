@@ -45,7 +45,8 @@ const store = new session_1.default((typeof express_session_1.default["session"]
 const userModel = new user_1.default(db, store);
 const fileModel = new files_1.default({
     store,
-    db
+    db,
+    userModel
 });
 const app = (0, express_1.default)();
 const PORT = process_1.env["PORT"] || 8080;

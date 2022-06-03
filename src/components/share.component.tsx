@@ -33,7 +33,6 @@ export default function Share (props: ShareProps) {
     const db = useMemo(() => {
         if ( db ) db.cancel();
         return debounce(searchField != '' ? () => {
-            
             const url = new URL(`/account/search`, config.apiRoot);
             url.searchParams.append('q', searchField);
             fetch(url.href).then(res => res.status >= 200 && res.status < 300 ? res.json() : Promise.reject(new Error(res.statusText))).then((users: {username: string}[]) => {
@@ -41,6 +40,18 @@ export default function Share (props: ShareProps) {
             })
         } : () => {}, 300);
     }, [searchField]);
+
+    const share = (username: string) => {
+        fetch(`${config.apiRoot}/files/share`, {
+            headers: {
+                "Content-Type": "application/json"
+            },
+            method: "post",
+            body: JSON.stringify({fid: props.id, username})
+        }).then(res => res.status >= 200 && res.status < 300 ? Promise.resolve() : Promise.reject(new Error(res.statusText))).then(() => {
+
+        }).catch(err => console.error(err));
+    }
 
     useEffect(() => {
         return () => db.cancel();
@@ -67,7 +78,7 @@ export default function Share (props: ShareProps) {
                                     onChange={(e) => setSearchField(e.target.value)}
                                 />
                                 <ul className="list-group no-top-radius">
-                                    { users.map(username => <ul className="list-group-item">{ username }</ul>) }
+                                    { users.map(username => <li className="list-group-item position-relative"><a className="stretched-link text-decoration-none text-dark" href='#' onClick={() => share(username)}>{ username }</a></li>) }
                                 </ul>
                             </div>
                         </div>
