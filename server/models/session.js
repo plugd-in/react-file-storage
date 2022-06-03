@@ -136,5 +136,15 @@ class SessionStore extends Store {
             });
         });
     }
+    unauthSession(sessionId) {
+        return new Promise((resolve, reject) => {
+            this.db.run(`UPDATE ${this.table} SET uid = NULL WHERE sid = ?`, [sessionId], (err) => {
+                if (err)
+                    reject(err);
+                else
+                    resolve();
+            });
+        });
+    }
 }
 exports.default = SessionStore;

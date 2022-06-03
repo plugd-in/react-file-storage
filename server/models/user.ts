@@ -108,4 +108,17 @@ export default class UserModel {
     getUserBySession (sessionId: string): Promise<Account | null> {
         return this.sessionStore.getSessionUser(sessionId);
     }
+
+    logoutSession (sessionId: string): Promise<void> {
+        return this.sessionStore.unauthSession(sessionId);
+    }
+
+    userSearch (username: string): Promise<Account[]> {
+        return new Promise((resolve, reject) => {
+            this.db.all(`SELECT (username) FROM ${this.table} WHERE username LIKE ?`, [`${username.replace('%', '\\%')}%`], (err, users: Account[]) => {
+                if (err) reject(err);
+                else resolve(users);
+            });
+        });
+    }
 }

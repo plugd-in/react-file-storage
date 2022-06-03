@@ -91,5 +91,18 @@ class UserModel {
     getUserBySession(sessionId) {
         return this.sessionStore.getSessionUser(sessionId);
     }
+    logoutSession(sessionId) {
+        return this.sessionStore.unauthSession(sessionId);
+    }
+    userSearch(username) {
+        return new Promise((resolve, reject) => {
+            this.db.all(`SELECT (username) FROM ${this.table} WHERE username LIKE ?`, [`${username.replace('%', '\\%')}%`], (err, users) => {
+                if (err)
+                    reject(err);
+                else
+                    resolve(users);
+            });
+        });
+    }
 }
 exports.default = UserModel;

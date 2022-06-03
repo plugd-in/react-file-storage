@@ -15,7 +15,7 @@ import Navbar from './components/navbar.component';
 
 
 export const config = {
-  apiRoot:""
+  apiRoot: document.location.origin
 };
 
 

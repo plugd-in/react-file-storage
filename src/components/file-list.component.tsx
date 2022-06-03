@@ -4,6 +4,7 @@ import useSWR, {mutate} from "swr";
 import { config } from "../App";
 import { FileList } from "../interfaces";
 import FileViewer from "./file-viewer.component";
+import Share from "./share.component";
 
 
 
@@ -35,7 +36,8 @@ export default function FileListComponent () {
                             </a>
                             </FileViewer>
                     </div>
-                    <button className="btn btn-danger" onClick={() => deleteFile((data||{})[key].id)}>Delete</button>
+                    <button className="btn btn-danger me-1" onClick={() => deleteFile((data||{})[key].id)}>Delete</button>
+                    <Share id={(data||{})[key].id}><button className="btn btn-success me-1">Share</button></Share>
                 </li>
             );
         });

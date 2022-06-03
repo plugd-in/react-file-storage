@@ -87,5 +87,28 @@ export default function accountRouter (userModel: UserModel, sessionStore: Sessi
         }
     });
 
+    router.post('/logout', (req, res) => {
+        if ( typeof req["sessionID"] !== "undefined" ) {
+            userModel.logoutSession(req["sessionID"]).then(() => res.status(200).end()).catch(err => {
+                res.status(500).end();
+            });
+        } else {
+            res.status(401).send("No authenticated session.").end();
+        }
+    });
+
+    router.get('/search', (req, res) => {
+        if ( typeof req.query["q"] === "string") {
+            userModel.userSearch(req.query["q"]).then((users) => {
+                res.set({
+                    "Content-Type": "application/json"
+                }).status(200).json(users);
+            }).catch(err => {
+                console.error(err);
+                res.status(500).end();
+            });
+        } else res.status(400).end();
+    });
+
     return router;
 }
