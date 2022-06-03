@@ -34,7 +34,8 @@ const userModel = new UserModel(db, store);
 
 const fileModel = new FileModel({
     store,
-    db
+    db,
+    userModel
 });
 
 

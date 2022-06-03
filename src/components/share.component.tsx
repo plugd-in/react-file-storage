@@ -14,7 +14,6 @@ interface ShareProps {
 
 export default function Share (props: ShareProps) {
     const [searchField, setSearchField] = useState<string>('');
-    const [ inFetch, setInFetch ] = useState(false); 
     const [users, setUsers] = useState<string[]>([]);
     const clickProxy = (original: Function | undefined) => {
         return (e: Event) => {

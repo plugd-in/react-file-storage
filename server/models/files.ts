@@ -4,11 +4,13 @@ import { FileObject, FileList } from '../interfaces';
 import { randomUUID } from "crypto";
 import { rm } from 'fs/promises';
 import { join, resolve } from "path";
+import UserModel from "./user";
 
 interface FileModelConfig {
     db: Database;
     store: SessionStore;
     table?: string;
+    userModel: UserModel;
 }
 
 function getUserBySession (sessionStore: SessionStore, sessionId: string) {
@@ -25,12 +27,13 @@ export default class FileModel {
     private table: string;
     private sessionStore: SessionStore;
     private storageDestination: string;
+    private userModel: UserModel;
     constructor (config: FileModelConfig) {
         this.db = config.db;
         this.table = config.table || 'files';
         this.sessionStore = config.store;
         this.storageDestination = join(resolve('.'), 'server/files');
-
+        this.userModel = config.userModel;
         this.db.serialize(() => {
             this.db.exec(`CREATE TABLE IF NOT EXISTS ${this.table} (
                 id TEXT PRIMARY KEY,
@@ -114,6 +117,17 @@ export default class FileModel {
                         rm(`${this.storageDestination}/${fid}`).then(() => resolve()).catch(reject);
                     }
                 });
+            });
+        })
+    }
+
+    shareFile (fid: string, username: string): Promise<void> {
+        return this.userModel.getUser(username).then(user => {
+            return new Promise((resolve, reject) => {
+                this.db.run(`INSERT OR REPLACE INTO ${this.table}_shares VALUES (?, ?)`, [fid, user.uid], (err) => {
+                    if (err) reject(err);
+                    else resolve();
+                })
             });
         })
     }
