@@ -1,3 +1,5 @@
+import React from 'react';
+
 export interface Account {
     uid: string;
     username: string;
@@ -15,5 +17,6 @@ export interface FileList {
 }
 
 export interface ViewerProps {
-    file: Blob | FileObject;
+    file: FileObject;
+    setOnView: (func: (e: Event) => Promise<void>) => void;
 }

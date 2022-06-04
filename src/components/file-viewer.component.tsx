@@ -14,7 +14,6 @@ interface FileViewerProps {
 
 interface FileViewerState {
     cType: string | null;
-    file: Blob | FileObject | null;
     fileLoaded: boolean;
 }
 
@@ -28,42 +27,30 @@ const fetchStatus = (response: Response) => {
 export default function FileViewer(props: FileViewerProps) {
     const [state, setState] = useState<FileViewerState>({
         cType: null,
-        file: null,
         fileLoaded: false
     });
 
-    const load = () => {
-        return fetch(`${config.apiRoot}/files/${props.file.id}`).then(fetchStatus).then(response => {
-            console.log(response);
-            console.log(response.headers.get("Content-Type"));
-            return response.blob().then(blob => {
-                if ( blob.type == "text/plain")
-                    setState({file: blob, cType: blob.type, fileLoaded: true});
-                else setState({file: props.file, cType: blob.type, fileLoaded: true});
-            });
-        });
-    };
-
+    const [{childFunction}, setFunction] = useState<{childFunction: (e: Event) => Promise<void>}>({childFunction: () => Promise.resolve()});
     const clickProxy = (original: Function | undefined) => {
         return (e: Event) => {
-            load().then(() => {
-                if (original) original(e);
-            }).catch((err) => {
-                if (original) original(e);
-            });
+            console.log(childFunction);
+            
+            childFunction(e).then(() => {
+                if (typeof original === "function") original(e)
+            }).catch(err =>  console.error(err));
         };
     }
 
-    const viewSelect = useMemo(() => {
-        if ( !state.fileLoaded ) return null;
-        switch (state.cType) {
-            // @ts-ignore
-            case 'text/plain':
-                if (state.file && state.file instanceof Blob) return <TextViewer file={state.file} />
+    const setChildFunction = (func: (e: Event) => Promise<void>) => {
+        setFunction({childFunction: func});
+    }
 
-            default:
-                return state.file ? <FallbackViewer file={state.file}/> : null;
+    const viewSelect = useMemo(() => {
+        if (props.file === null) return null;
+        if ( props.file.filename.endsWith('.txt')) {
+            return <TextViewer setOnView={setChildFunction} file={props.file} />
         }
+        return <FallbackViewer setOnView={setChildFunction} file={props.file}/>;
     }, [state]);
 
     return (

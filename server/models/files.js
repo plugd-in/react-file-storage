@@ -100,7 +100,6 @@ class FileModel {
             if (user)
                 return new Promise((resolve, reject) => {
                     this.db.get(`SELECT * FROM ${this.table} WHERE owner=?`, [user.uid], (err, row) => {
-                        console.log("Mark 1:", row);
                         if (err)
                             reject(err);
                         else

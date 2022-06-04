@@ -1,26 +1,32 @@
 import { useEffect, useState } from 'react'
+import { config } from '../App';
 import { ViewerProps } from '../interfaces'
 
 interface TextViewerState {
     text: string;
 }
 
-interface TextViewerProps {
-    file: Blob;
-}
 
-export default function TextViewer (props: TextViewerProps) {
-    const [ state, setState ] = useState<TextViewerState>({
-        text: ""
-    });
+export default function TextViewer (props: ViewerProps) {
+    const [ text, setText ] = useState<string>("");
+
+    const [doStartLoading, setStartLoading] = useState<boolean>(false); 
 
     useEffect(() => {
-        props.file.text().then(text => {
-            setState({...state, text});
-        }).catch(err => console.error(err));
-    }, [props.file]);
+        props.setOnView(() => {
+            setStartLoading(true);
+            return Promise.resolve();
+        }
+    )}, []);
+
+    useEffect(() => {
+        if (doStartLoading) fetch(`${config.apiRoot}/files/${props.file.id}`).then(
+            res => res.status >= 200 && res.status < 300 ?
+            res.text() : Promise.reject(res.statusText)
+        ).then(setText).catch(console.error);
+    }, [props.file, doStartLoading]);
 
     return (
-        <textarea className='form-control' readOnly={true} value={state.text}></textarea>
+        <textarea className='form-control' readOnly={true} value={text}></textarea>
     );
 }

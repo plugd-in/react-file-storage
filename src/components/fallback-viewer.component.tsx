@@ -12,7 +12,7 @@ export default function FallbackViewer(props: ViewerProps) {
     return (
         <a  className='btn btn-primary'
             target='_blank'
-            href={props.file instanceof Blob ? URL.createObjectURL(props.file) : `${config.apiRoot}/files/${props.file.id}`}
+            href={`${config.apiRoot}/files/${props.file.id}`}
         >Open/Download File</a>
     );
 }
