@@ -95,8 +95,24 @@ class FileModel {
             });
         });
     }
+    ownsFile(fid, sessionId) {
+        return this.userModel.getUserBySession(sessionId).then(user => {
+            if (user)
+                return new Promise((resolve, reject) => {
+                    this.db.get(`SELECT * FROM ${this.table} WHERE owner=?`, [user.uid], (err, row) => {
+                        console.log("Mark 1:", row);
+                        if (err)
+                            reject(err);
+                        else
+                            resolve(typeof row === "object");
+                    });
+                });
+            else
+                return Promise.reject("Session not authenticated.");
+        });
+    }
     deleteFile(fid, sessionId) {
-        return getUserBySession(this.sessionStore, sessionId).then(user => {
+        return this.ownsFile(fid, sessionId).then(owner => owner ? this.userModel.getUserBySession(sessionId) : Promise.reject(new Error("Session not authenticated."))).then(user => {
             return new Promise((resolve, reject) => {
                 this.db.run(`DELETE FROM ${this.table} WHERE id = $fid AND owner = $uid`, {
                     $uid: user.uid,
@@ -109,21 +125,6 @@ class FileModel {
                     }
                 });
             });
-        });
-    }
-    ownsFile(fid, sessionId) {
-        return this.userModel.getUserBySession(sessionId).then(user => {
-            if (user)
-                return new Promise((resolve, reject) => {
-                    this.db.get(`SELECT * FROM ${this.table} WHERE owner=?`, [user.uid], (err, row) => {
-                        if (err)
-                            reject(err);
-                        else
-                            resolve(row !== null);
-                    });
-                });
-            else
-                return Promise.reject("Session not authenticated.");
         });
     }
     shareFile(fid, sessionId, username) {

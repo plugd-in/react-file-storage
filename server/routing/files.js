@@ -108,9 +108,14 @@ function fileRouter(fileModel, userModel) {
         if (typeof req["sessionID"] !== "undefined") {
             fileModel.deleteFile(req.params["fileId"], req["sessionID"]).then(() => {
                 res.status(200).end();
-            }).catch(err => {
-                console.error(err);
-                res.status(500).end();
+            }).catch((err) => {
+                switch (err.message) {
+                    case 'Session not authenticated.':
+                        res.status(401).end();
+                        break;
+                    default:
+                        res.status(500).end();
+                }
             });
         }
         else
