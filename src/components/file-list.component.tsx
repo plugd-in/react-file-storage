@@ -23,25 +23,27 @@ export default function FileListComponent () {
     }).then(fetchStatus).then(() => mutate(`${config.apiRoot}/files`)).catch(err => console.error(err));
 
     const files = useMemo(() => {
-        return Object.keys(data||{}).map(key => {
+        const fileList = data || {};
+        return Object.keys(fileList).map(key => {
             return (
-                <li className="list-group-item position-relative d-flex align-items-stretch">
+                <li className="list-group-item position-relative d-flex align-items-stretch" id={`fli-${fileList[key].id}`}>
                     <div className="position-relative flex-grow-1 align-items-center d-flex">
-                        <FileViewer file={(data||{})[key]}>
+                        <FileViewer file={fileList[key]}>
                             <a
                                 className="stretched-link"
-                                href={`${config.apiRoot}/files/${(data||{})[key].id}`}
+                                href={`${config.apiRoot}/files/${fileList[key].id}`}
                             >
-                                {(data||{})[key].filename}
+                                {fileList[key].filename}
                             </a>
                             </FileViewer>
                     </div>
-                    <button className="btn btn-danger me-1" onClick={() => deleteFile((data||{})[key].id)}>Delete</button>
-                    <Share id={(data||{})[key].id}><button className="btn btn-success me-1">Share</button></Share>
+                    <button className="btn btn-danger me-1" onClick={() => deleteFile(fileList[key].id)}>Delete</button>
+                    <Share id={fileList[key].id}><button className="btn btn-success me-1">Share</button></Share>
                 </li>
             );
         });
     }, [data]);
+
     if ( files.length === 0 ) 
         return (
             <div className='container mt-1 p-3 border'>

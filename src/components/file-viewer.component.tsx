@@ -25,16 +25,9 @@ const fetchStatus = (response: Response) => {
 }
 
 export default function FileViewer(props: FileViewerProps) {
-    const [state, setState] = useState<FileViewerState>({
-        cType: null,
-        fileLoaded: false
-    });
-
     const [{childFunction}, setFunction] = useState<{childFunction: (e: Event) => Promise<void>}>({childFunction: () => Promise.resolve()});
     const clickProxy = (original: Function | undefined) => {
         return (e: Event) => {
-            console.log(childFunction);
-            
             childFunction(e).then(() => {
                 if (typeof original === "function") original(e)
             }).catch(err =>  console.error(err));
@@ -45,13 +38,13 @@ export default function FileViewer(props: FileViewerProps) {
         setFunction({childFunction: func});
     }
 
-    const viewSelect = useMemo(() => {
+    const viewSelect = () => {
         if (props.file === null) return null;
         if ( props.file.filename.endsWith('.txt')) {
             return <TextViewer setOnView={setChildFunction} file={props.file} />
         }
         return <FallbackViewer setOnView={setChildFunction} file={props.file}/>;
-    }, [state]);
+    };
 
     return (
         <>
@@ -64,7 +57,7 @@ export default function FileViewer(props: FileViewerProps) {
                             <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div className="modal-body">
-                            { viewSelect }
+                            { viewSelect() }
                         </div>
                         <div className="modal-footer">
                             <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
