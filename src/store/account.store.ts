@@ -10,6 +10,7 @@ interface AccountState {
     authenticateUser: (username: string, password: string) => void;
     validateSession: () => Promise<void>;
     createUser: (username: string, password: string) => Promise<void>;
+    logout: () => Promise<void>; 
 }
 
 const fetchStatus = (response: Response) => {
@@ -23,8 +24,8 @@ const useAccount = create<AccountState>((set, get) => ({
     passwordHash: "",
     uid: "",
     loggedIn: false,
-    authenticateUser: async (username: string, password: string) => {
-        const newState = await fetch(`${config.apiRoot}/account/login`, {
+    authenticateUser: (username: string, password: string) => {
+        fetch(`${config.apiRoot}/account/login`, {
             headers: {
                 "Content-Type": "application/json",
                 "Access-Control-Origin": "*"
@@ -33,9 +34,10 @@ const useAccount = create<AccountState>((set, get) => ({
             method: "POST",
             body: JSON.stringify({username, password})
         }).then(fetchStatus).then((userInfo: Account) => {
-            return {...userInfo, loggedIn: true}
+            set({...userInfo, loggedIn: true});
+        }).catch(err => {
+            console.error(err);
         });
-        set(newState);
     },
     // Fetch the logged in user, if the user is logged in.
     validateSession: () => {
@@ -47,7 +49,7 @@ const useAccount = create<AccountState>((set, get) => ({
             mode: "cors"
         }).then(fetchStatus).then((userInfo: Account) => {
             set({...userInfo, loggedIn: true});
-        });
+        }).catch(err => err instanceof Error ? err.message == "Unauthorized" ? Promise.resolve() : Promise.reject(err) : console.error(err));
     }, 
     createUser: function (username: string, password: string) {
         return fetch(`${config.apiRoot}/account`, {
@@ -57,6 +59,13 @@ const useAccount = create<AccountState>((set, get) => ({
             method: "post",
             body: JSON.stringify({username, password})
         }).then(fetchStatus).then(this.validateSession);
+    },
+    logout: function () {
+        return fetch(`${config.apiRoot}/account/logout`, {
+            method: 'post'
+        }).then(fetchStatus).then(() => {
+            set({...get(), loggedIn: false, uid: "", username: "", passwordHash: ""});
+        });
     }
 }));
 
