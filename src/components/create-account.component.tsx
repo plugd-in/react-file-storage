@@ -12,11 +12,6 @@ interface CreateAccountState {
     password: string;
 }
 
-const fetchStatus = (response: Response) => {
-    if ( response.status >= 200 && response.status < 300)
-        return Promise.resolve(response);
-    return Promise.reject(new Error(response.statusText));
-}
 
 export default function CreateAccount (props: CreateAccountProps) {
     const [ state, setState ] = useState<CreateAccountState>({
@@ -40,6 +35,7 @@ export default function CreateAccount (props: CreateAccountProps) {
     }
     return (
         <div className='container mt-1 border rounded p-3'>
+          <h4>Create Account</h4>
           <input className='form-control mb-1' type="text" value={state.username} onChange={e => handleChange(0, e)}/>
           <input className='form-control mb-1' type="text" value={state.password} onChange={e => handleChange(1, e)}/>
           <input className='form-control btn btn-primary' type="button" value="Create Account" onClick={() => createUser(state.username, state.password)}/>

@@ -20,6 +20,7 @@ export default function LoginComponent () {
 
     return (
         <div className='container mt-1 border rounded p-3'>
+            <h4>Login</h4>
             <input className='form-control mb-1' type="text" value={state.username} onChange={e => handleChange(0, e)}/>
             <input className='form-control mb-1' type="text" value={state.password} onChange={e => handleChange(1, e)}/>
             <input className='form-control btn btn-primary' type="button" value="Login" onClick={() => user.authenticateUser(state.username, state.password)}/>
