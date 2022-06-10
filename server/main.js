@@ -67,7 +67,3 @@ app.use('/', (0, express_1.static)('build'));
 app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}...`);
 });
-userModel.createUser("plunged", "guest").then(res => userModel.getUser('plunged')).then((user) => {
-}).catch((err) => {
-    console.error(err);
-});

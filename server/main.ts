@@ -63,9 +63,4 @@ app.use('/', staticMiddleware('build'));
 
 app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}...`);
-})
-
-userModel.createUser("plunged", "guest").then(res => userModel.getUser('plunged')).then((user) => {
-}).catch((err) => {
-    console.error(err);
 });
